@@ -12,19 +12,18 @@ import SwiftyJSON
 
 class ViewController: UIViewController,UIPickerViewDelegate,UIPickerViewDataSource {
     
-    
-    @IBOutlet weak var lblPrice: UILabel!
-    @IBOutlet weak var currencyPickerView: UIPickerView!
-    let currencyArray = ["ARS","AUD","BRL","CAD","CNY","COP","EUR","GBP","HKD","IDR","ILS","INR","JPY","LRD","MXN","NOK","NZD","PLN","RON","RUB","HUF","MZN","SVC"]
-    
-    let symbols = ["$","$","R","$","¥","$","€","£","$","Rp","₪","₹","¥","$","$","kr","$","zł","lei","₽"
-        ,"Ft","MT","$"]
-    
-    
-    let baseURL="https://apiv2.bitcoinaverage.com/indices/global/ticker/BTC"
+    private var modelBusiness=Business()
     
     var finalURL: String?
     
+    let currencyArray = ["ARS","AUD","BRL","BOB","CAD","CNY","COP","EUR","GBP","HKD","IDR","ILS","INR","JPY","LRD","MXN","NOK","NZD","PLN","RON","RUB","HUF","UYU"]
+    
+    let symbols = ["$","$","R","Bs","$","¥","$","€","£","$","Rp","₪","₹","¥","$","$","kr","$","zł","lei","₽"
+        ,"Ft","$U"]
+    
+    @IBOutlet weak var lblPrice: UILabel!
+    @IBOutlet weak var currencyPickerView: UIPickerView!
+ 
     override func viewDidLoad() {
         super.viewDidLoad()
         currencyPickerView.delegate=self
@@ -40,12 +39,8 @@ class ViewController: UIViewController,UIPickerViewDelegate,UIPickerViewDataSour
         return currencyArray[row]
     }
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        print(currencyArray[row])
-        
-        finalURL=baseURL+currencyArray[row]
+        finalURL=modelBusiness.baseURL+currencyArray[row]
         getBitcoinData(url: finalURL!,symbol: symbols[row])
-        
-
     }
     
     //MARK: - Networking
@@ -54,30 +49,22 @@ class ViewController: UIViewController,UIPickerViewDelegate,UIPickerViewDataSour
             if response.result.isSuccess{
                 let bitcoinJSON: JSON = JSON(response.result.value!)
                 self.updateBitCoinData(json:bitcoinJSON,symbol: symbol)
-            
             }
             else{
                 print ("Error: \(response.result.error)")
                 self.lblPrice.text="Se presento un problema"
             }
         }
-        
     }
+    
     func updateBitCoinData(json:JSON,symbol:String){
         if let bitcoinResult=json["ask"].double {
-            lblPrice.text=symbol+String(FormatNumber(number:bitcoinResult))
+            lblPrice.text=symbol+String(modelBusiness.FormatNumber(number:bitcoinResult))
         }
         else{
         lblPrice.text="Servicio no Disponible"
         }
     }
-    func FormatNumber(number:Double) -> String {
-        let numberFormatter = NumberFormatter()
-        numberFormatter.numberStyle = NumberFormatter.Style.decimal
-        numberFormatter.groupingSeparator = "."
-        let returnValue = numberFormatter.string(from: NSNumber(value:number))
-        
-        return returnValue!
-    }
+
 }
 
